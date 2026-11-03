@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AirDrop for Brave",
+  "name": "Local Share Bridge",
   "description": "Share pages, links and selected text using the macOS AirDrop picker and a separately installed native helper.",
   "version": "0.1.0",
   "permissions": ["activeTab", "contextMenus", "nativeMessaging"],

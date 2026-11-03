@@ -18,7 +18,10 @@ and authenticated local IPC.
 Protocol 1 uses a four-byte little-endian length and UTF-8 JSON. The request has
 a UUID, `share` action, kind and matching one-field payload. The diagnostic
 `ping` request opens no UI. The host rejects oversized frames, unsupported
-schemes, credential-bearing URLs and all file requests. Limits are 128 KiB
+schemes, credential-bearing URLs and all caller-supplied file requests. If
+AppKit rejects plain text, the helper supplies a generated UTF-8 text file from
+a private temporary directory. It removes the directory on completion, failure,
+cancellation or orderly disconnect. Limits are 128 KiB
 framed input, 8 KiB per URL and 16 KiB per text selection, measured in UTF-8
 bytes. The port first gets `accepted` when the host is about to invoke AppKit.
 Only the AppKit delegate can return `shared`, `cancelled` or a terminal share

@@ -1,6 +1,12 @@
 {
   "name": "brave-airdrop",
   "private": true,
-  "scripts": {"build": "sh scripts/build-extension.sh", "test": "npm run build && sh tests/test.sh"},
-  "devDependencies": {"@types/chrome": "0.1.27", "typescript": "5.9.3"}
+  "scripts": {
+    "build": "sh scripts/build-extension.sh",
+    "test": "npm run build && sh tests/test.sh"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.3.7",
+    "typescript": "7.0.2"
+  }
 }

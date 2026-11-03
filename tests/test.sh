@@ -28,3 +28,6 @@ if scripts/install-local.sh "$id" >"$fixture/collision.log" 2>&1; then
 fi
 test "$(cat "$chrome")" = 'existing registration'
 test ! -e "$brave" && test ! -e "$brave.json"
+
+MACOSX_DEPLOYMENT_TARGET=14.0 swiftc macos/Protocol.swift tests/SelectionTest.swift -o "$fixture/selection-test"
+"$fixture/selection-test"

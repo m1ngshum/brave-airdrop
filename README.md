@@ -16,7 +16,8 @@ and Node.js 24+. Apple Silicon is the initial target.
    `scripts/install-local.sh <extension-id>`, then `scripts/doctor.sh`.
 4. Pin the extension. On an HTTP or HTTPS page, click its toolbar button or
    choose **Share via AirDrop** from the page context menu. The link and text
-   context menus share the clicked link or selected text respectively. Choose
+   context menus share the clicked link or selected text respectively. If macOS
+   rejects plain text, the selection arrives as `AirDrop Selection.txt`. Choose
    the recipient in the macOS interface. If the badge shows **!**, hover over
    the toolbar icon to see the error.
 

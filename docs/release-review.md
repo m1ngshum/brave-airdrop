@@ -1,9 +1,9 @@
 # 0.1.0 release review
 
-**Status: hold for publication.** Page and link delivery passed on an iPhone.
-Selected-text sharing failed before the picker opened. The current candidate
-is for review only. Fix and retest text sharing, or remove the feature and
-its listing claim before submission.
+**Status: ready for review.** Page, hyperlink, and selected Unicode text
+arrived on an iPhone. When macOS rejects plain text, the helper shares the
+selection as a UTF-8 `.txt` file. Store packaging and clean-machine validation
+remain pending.
 
 The extension is designed to send the current page, a clicked link, or
 selected text to a recipient chosen in macOS AirDrop. The extension requires a

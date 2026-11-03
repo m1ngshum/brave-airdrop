@@ -6,8 +6,11 @@ helper. The helper gives it to Apple's AirDrop service so you can choose a
 recipient. The recipient you select receives the item through AirDrop. Shared
 URLs and text can contain private information, including query parameters.
 
-The extension and helper do not store share content, send it to our servers,
-use analytics or advertising, or access browser cookies or download history.
+If macOS does not accept plain text, the helper writes the selection to a
+private temporary UTF-8 file for the transfer and removes it when the request
+ends normally. A forced termination may leave the file in the macOS temporary
+directory. The extension and helper do not send content to our servers, use
+analytics or advertising, or access browser cookies or download history.
 The local native host registration stores the extension ID and helper path.
 macOS and the recipient handle the resulting AirDrop transfer.
 

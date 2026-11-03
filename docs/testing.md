@@ -29,8 +29,12 @@ the service cannot handle the supplied item. The same session successfully
 shared URLs, but this test did not distinguish the two native error branches.
 See Apple's [item availability check](https://developer.apple.com/documentation/appkit/nssharingservice/canperform%28withitems%3A%29).
 
-Before releasing, resolve the selected-text failure and repeat its iPhone
-test, including Unicode text, or explicitly remove selection sharing from
-the release and its listing. Still pending: a clean-profile install, Brave
+After installing the updated helper in the same profile, **AirDrop Selection
+passed**. The iPhone received `AirDrop Selection.txt` and the user confirmed it
+contained the exact selected Unicode text, `许可`. The original plain-text
+failure above is retained as the reproduction. The local staging test checks
+byte-for-byte Unicode, newline, and emoji preservation and private permissions.
+
+Still pending: a clean-profile install, Brave
 restart, simultaneous requests, missing-helper and unavailable-AirDrop
 feedback, and a macOS 14 run. Images and downloaded files are deferred.

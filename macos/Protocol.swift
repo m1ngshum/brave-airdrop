@@ -56,14 +56,32 @@ func readFrame(from handle: FileHandle) throws -> Data {
     return try readExactly(count, from: handle)
 }
 
-func respond(_ status: String, id: String?, code: String? = nil) {
+@discardableResult
+func respond(_ status: String, id: String?, code: String? = nil) -> Bool {
     var reply: [String: Any] = ["version": 1, "requestId": id as Any? ?? NSNull(), "status": status]
     if let code { reply["error"] = ["code": code] }
     do {
         let data = try JSONSerialization.data(withJSONObject: reply)
         var length = UInt32(data.count).littleEndian
         try FileHandle.standardOutput.write(contentsOf: withUnsafeBytes(of: &length) { Data($0) } + data)
+        return true
     } catch {
-        exit(1)
+        return false
+    }
+}
+
+func stageSelection(_ text: String, in parent: URL = FileManager.default.temporaryDirectory) throws -> URL {
+    let directory = parent.appendingPathComponent("brave-airdrop-" + UUID().uuidString, isDirectory: true)
+    let files = FileManager.default
+    try files.createDirectory(at: directory, withIntermediateDirectories: false,
+                              attributes: [.posixPermissions: 0o700])
+    let file = directory.appendingPathComponent("AirDrop Selection.txt")
+    do {
+        try Data(text.utf8).write(to: file, options: .withoutOverwriting)
+        try files.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)
+        return file
+    } catch {
+        try? files.removeItem(at: directory)
+        throw error
     }
 }

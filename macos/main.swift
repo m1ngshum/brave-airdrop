@@ -4,17 +4,22 @@ final class Share: NSObject, NSSharingServiceDelegate {
     let id: String
     let service: NSSharingService
 
-    init(id: String, service: NSSharingService) {
+    let stagedFile: URL?
+
+    init(id: String, service: NSSharingService, stagedFile: URL?) {
         self.id = id
         self.service = service
+        self.stagedFile = stagedFile
     }
 
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) {
+        cleanUp()
         respond("shared", id: id)
         exit(0)
     }
 
     func sharingService(_ sharingService: NSSharingService, didFailToShareItems items: [Any], error: Error) {
+        cleanUp()
         let failure = error as NSError
         if failure.domain == NSCocoaErrorDomain && failure.code == NSUserCancelledError {
             respond("cancelled", id: id)
@@ -22,6 +27,9 @@ final class Share: NSObject, NSSharingServiceDelegate {
             respond("error", id: id, code: "SHARE_FAILED")
         }
         exit(0)
+    }
+    func cleanUp() {
+        if let stagedFile { try? FileManager.default.removeItem(at: stagedFile.deletingLastPathComponent()) }
     }
 }
 
@@ -58,20 +66,38 @@ func run() throws {
 
     let app = NSApplication.shared
     app.setActivationPolicy(.accessory)
-    guard let service = NSSharingService(named: .sendViaAirDrop), service.canPerform(withItems: [item])
+    guard let service = NSSharingService(named: .sendViaAirDrop)
     else { respond("error", id: request.id, code: "AIRDROP_UNAVAILABLE"); return }
 
-    let delegate = Share(id: request.id, service: service)
+    var stagedFile: URL?
+    if let text = item as? String, !service.canPerform(withItems: [text]) {
+        do { stagedFile = try stageSelection(text) } catch {
+            respond("error", id: request.id, code: "SHARE_FAILED")
+            return
+        }
+    }
+    let items = [stagedFile.map { $0 as Any } ?? item]
+    let delegate = Share(id: request.id, service: service, stagedFile: stagedFile)
+    defer { delegate.cleanUp() }
+    guard service.canPerform(withItems: items)
+    else { respond("error", id: request.id, code: "AIRDROP_UNAVAILABLE"); return }
+
     service.delegate = delegate
     DispatchQueue.main.async {
         app.activate()
-        respond("accepted", id: request.id)
-        service.perform(withItems: [item])
+        guard respond("accepted", id: request.id) else {
+            delegate.cleanUp()
+            exit(1)
+        }
+        service.perform(withItems: items)
     }
     // Closing the browser port closes stdin. No further requests are supported.
     DispatchQueue.global().async {
         _ = try? FileHandle.standardInput.read(upToCount: 1)
-        exit(0)
+        DispatchQueue.main.async {
+            delegate.cleanUp()
+            exit(0)
+        }
     }
     withExtendedLifetime(delegate) { app.run() }
 }

@@ -1,13 +1,14 @@
-# AirDrop for Brave
+# Local Share Bridge
 
 An experimental macOS extension and native helper for sharing a page, link or
 selected text from Brave through Apple's AirDrop interface. No account, backend
-or telemetry. This independent project is not affiliated with Apple or Brave.
+or telemetry. This independent project is not affiliated with Apple or Brave. AirDrop and
+macOS are trademarks of Apple Inc. Brave is a trademark of Brave Software, Inc.
 
 ## Local installation
 
 Requires Brave, macOS 14+, Xcode Command Line Tools (`xcode-select --install`)
-and Node.js 24+. Apple Silicon is the initial target.
+and Node.js 26 LTS. Apple Silicon is the initial target.
 
 1. Run `npm ci --ignore-scripts && npm run build`.
 2. Open `brave://extensions`, enable Developer mode and choose **Load unpacked**.

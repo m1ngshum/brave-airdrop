@@ -10,17 +10,27 @@ MV3 extension, completed a real browser-to-helper ping, and got an `accepted`
 reply for a synthetic HTTPS URL. The temporary registration was removed. The
 probe did not inspect the picker or select a recipient.
 
-Before releasing, use an Apple Silicon Mac with a clean Brave profile and a
-second discoverable Apple device. Record the macOS and Brave versions:
+## Physical-device test: November 3, 2026
 
-1. Install the unpacked build and confirm the doctor accepts the exact ID.
-2. Use the toolbar and page context menu with a harmless HTTPS URL. Observe
-   Apple's picker and verify the received URL on the other device.
-3. Share a different hyperlink and selected Unicode text. Verify the recipient
-   gets the link target and the text respectively.
-4. Cancel the picker and try again. Check unavailable AirDrop and missing helper
-   feedback. Repeat after restarting Brave and try simultaneous actions.
-5. Repeat on macOS 14 before claiming compatibility with that minimum version.
+Unpacked 0.1.0, source commit `15c21be`, in the active Brave profile on
+macOS 27.2 with Brave 156.1.98.63. The helper diagnostic passed. The user
+confirmed receipt on a nearby iPhone for the successful transfers.
 
-Images and downloaded files are intentionally deferred. Do not claim the picker
-or transfer works until the corresponding manual test passes.
+| Action | Result |
+| --- | --- |
+| Toolbar: open picker, then Cancel | Picker appeared and closed without sending. |
+| Toolbar: reopen and send | iPhone received `https://example.com/`. |
+| Right-click page: Share via AirDrop | iPhone received `https://example.com/`. |
+| Right-click hyperlink: AirDrop Link | iPhone received the IANA link target (`https://www.iana.org/help/example-domains`), rather than the page URL. |
+| Right-click selected paragraph: AirDrop Selection | **Failed.** Brave showed “AirDrop is unavailable for this item”; no picker appeared and the iPhone received nothing. |
+
+The helper emits this error if AppKit does not provide an AirDrop service or
+the service cannot handle the supplied item. The same session successfully
+shared URLs, but this test did not distinguish the two native error branches.
+See Apple's [item availability check](https://developer.apple.com/documentation/appkit/nssharingservice/canperform%28withitems%3A%29).
+
+Before releasing, resolve the selected-text failure and repeat its iPhone
+test, including Unicode text, or explicitly remove selection sharing from
+the release and its listing. Still pending: a clean-profile install, Brave
+restart, simultaneous requests, missing-helper and unavailable-AirDrop
+feedback, and a macOS 14 run. Images and downloaded files are deferred.

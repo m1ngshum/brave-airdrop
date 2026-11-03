@@ -1,6 +1,7 @@
 # Publishing plan
 
-1. Pass the [physical device checks](testing.md) with the source installation.
+1. Review the [0.1.0 release checklist](release-review.md) and pass the
+   remaining [physical device checks](testing.md) before submission.
 2. Build the extension with `npm ci --ignore-scripts && npm run build`. Run
    `mkdir -p .build && (cd dist && zip -X ../.build/airdrop-extension.zip manifest.json background.js)`.
    The manifest must be at the archive root. Add original icons, screenshots,

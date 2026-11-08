@@ -30,3 +30,7 @@ Run `npm test` on macOS for the TypeScript build, isolated install/uninstall and
 native protocol checks. Read the [test plan](docs/testing.md) before relying on
 AirDrop, the [architecture and trust model](docs/architecture.md) for design
 details, and the [publishing plan](docs/publishing.md) for distribution.
+
+## Contact
+
+For general enquiries, contact [hello@m1ngshum.com](mailto:hello@m1ngshum.com).

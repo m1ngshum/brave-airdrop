@@ -3,7 +3,8 @@
 `npm test` builds the extension and runs the installer and Swift host in a
 temporary home. It covers exact origin matching, diagnostic framing, malformed
 and oversized frames, unsupported requests, install permissions, refusing to
-overwrite an existing registration, and uninstall. This is not an AirDrop test.
+overwrite an existing registration, and retrying an interrupted uninstall.
+Physical AirDrop tests require a nearby receiver.
 
 On macOS 27.2 with Brave 156.1.98.63, an isolated headless profile loaded the
 MV3 extension, completed a real browser-to-helper ping, and got an `accepted`
@@ -31,7 +32,8 @@ See Apple's [item availability check](https://developer.apple.com/documentation/
 
 After installing the updated helper in the same profile, **AirDrop Selection
 passed**. The iPhone received `AirDrop Selection.txt` and the user confirmed it
-contained the exact selected Unicode text, `许可`. The original plain-text
+contained the exact selected Unicode text, `许可`. Commit `ae72bb3` contains
+the merged fallback implementation. The original plain-text
 failure above is retained as the reproduction. The local staging test checks
 byte-for-byte Unicode, newline, and emoji preservation and private permissions.
 

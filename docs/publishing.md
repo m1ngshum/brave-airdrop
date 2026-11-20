@@ -2,27 +2,35 @@
 
 1. Review the [0.1.0 release checklist](release-review.md) and pass the
    remaining [physical device checks](testing.md) before submission.
-2. Build the extension with `npm ci --ignore-scripts && npm run build`. Run
-   `mkdir -p .build && (cd dist && zip -X ../.build/airdrop-extension.zip manifest.json background.js)`.
-   The manifest must be at the archive root. Add original icons, screenshots,
-   a public [privacy policy](privacy.md), and reviewer instructions for the helper.
-3. Create a draft in the [Chrome Web Store Developer Dashboard](https://developer.chrome.com/docs/webstore/publish).
-   Obtain the assigned extension ID. Disclose the separate native installation
-   and why each browser permission is needed. Test with the actual store ID and
-   the packaged build before seeking public review.
-4. Create a macOS installer for the helper and exact store origin. Install the
-   manifests in the user's Brave and Chrome native host directories as that
-   user, without replacing an existing registration. Sign the native executable with Developer ID
-   Application and a distributed installer package with Developer ID Installer.
-   [Notarize and staple](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
-   the distributed package and test it on a clean Mac with Gatekeeper enabled.
-   Put the verified installer and checksum on GitHub Releases, and link it from
-   the store listing and reviewer instructions.
+2. From the repository root, build a fresh extension ZIP and checksum.
+   Review the ZIP contents. The manifest must be at the archive root.
 
-The Chrome Web Store installs the browser extension; it cannot install the
-native host. Brave users can install compatible Chrome Web Store extensions.
-The source installer is for local development. No store submission, signed
-installer, or public binary release is part of this build.
+   ```sh
+   (
+     set -eu
+     npm ci --ignore-scripts
+     npm run build
+     mkdir -p .build
+     staging=$(mktemp -d "$PWD/.build/store-zip.XXXXXX")
+     trap 'rm -rf "$staging"' EXIT
+     (cd dist && zip -X "$staging/airdrop-extension.zip" manifest.json background.js)
+     mv "$staging/airdrop-extension.zip" .build/airdrop-extension.zip
+     (cd .build && shasum -a 256 airdrop-extension.zip > airdrop-extension.zip.sha256)
+   )
+   ```
+
+3. Use the existing 0.1.0 item in the [Chrome Web Store Developer Dashboard](https://developer.chrome.com/docs/webstore/publish).
+   Confirm that its extension ID is `blbeidgcnkmmlcmgafgpgoaaabnnokga`.
+   Prepare the icon, screenshot, public [privacy policy](privacy.md), permission
+   justifications, and reviewer instructions before requesting public review.
+4. Give reviewers a public link to the exact reviewed helper source revision
+   and the [setup and test steps](release-review.md#reviewer-setup).
+   Test that source against the actual store ID and packaged extension on a
+   clean Mac with Gatekeeper enabled.
+
+The Chrome Web Store installs the browser extension. Users build and register
+the macOS helper separately with Xcode Command Line Tools. Public distribution
+is the planned visibility for 0.1.0.
 
 ## Terms and submission checks
 
@@ -38,7 +46,7 @@ The helper uses the documented [AppKit sharing service](https://developer.apple.
 lets the user select a recipient, and ships no Apple or Brave binaries. No
 published restriction on this API use was identified in the
 [Apple Developer Program terms](https://developer.apple.com/support/terms/apple-developer-program-license-agreement/).
-Review the agreement applicable to the signing account before distribution.
+Review the applicable signing agreement if a later release distributes binaries.
 
 For the [Chrome Web Store policies](https://developer.chrome.com/docs/webstore/program-policies/policies)
 and [developer agreement](https://developer.chrome.com/docs/webstore/program-policies/terms):
@@ -48,14 +56,15 @@ and [developer agreement](https://developer.chrome.com/docs/webstore/program-pol
   requirements prominently before installation; do not download or install it
   automatically. Include permissions, data use, the temporary text-file fallback,
   and the public privacy-policy URL in the store submission.
-- Provide reviewers with the signed helper, installation and removal steps,
-  and a test procedure. Check the exact store ID with the packaged helper on
-  current Chrome and Brave on macOS before making compatibility claims.
-- Start with [private trusted testers](https://developer.chrome.com/docs/webstore/cws-dashboard-distribution)
-  and then request public distribution. Private and unlisted items still
-  undergo review. Approval is up to the store and is not guaranteed.
+- Provide the exact helper source revision, installation and removal steps, and
+  a test procedure. Check the store ID with the packaged extension in Brave on
+  macOS. Verify each additional browser before claiming compatibility.
+- Use the [Distribution tab](https://developer.chrome.com/docs/webstore/cws-dashboard-distribution)
+  to set public visibility and the [Test instructions tab](https://developer.chrome.com/docs/webstore/publish)
+  to explain how reviewers can build and test the helper.
 
-Use a per-user setup step for the native messaging registrations. A package
-running as root must not guess the target home or place writable registrations
-in other users' profiles. Test installation, update, and removal without
-disabling Gatekeeper.
+If a prebuilt helper is distributed in a later release, sign it with Developer
+ID Application, sign any distributed installer package with Developer ID
+Installer, and [notarize and staple the package](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
+Use a per-user setup step for native messaging registrations and test
+installation, update, and removal with Gatekeeper enabled.

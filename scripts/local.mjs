@@ -22,11 +22,22 @@ function safe(file, directory = false) {
     throw Error("Unsafe owner, type or permissions: " + file);
   }
 }
+function existing(file, check) {
+  try {
+    fs.lstatSync(file);
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+  check(file);
+  return true;
+}
 function registration(file) {
   safe(file);
   const config = JSON.parse(fs.readFileSync(file, "utf8"));
   if (config.name !== host || config.path !== executable || config.type !== "stdio" ||
-      config.allowed_origins?.length !== 1 || !originPattern.test(config.allowed_origins[0])) {
+      !Array.isArray(config.allowed_origins) || config.allowed_origins.length !== 1 ||
+      typeof config.allowed_origins[0] !== "string" || !originPattern.test(config.allowed_origins[0])) {
     throw Error("Unexpected host registration; inspect it manually.");
   }
   return config.allowed_origins[0];
@@ -45,7 +56,8 @@ try {
           if (error.code !== "EEXIST") throw error;
         }
       }
-      safe(parent, true);
+      if (command === "uninstall" && !existing(parent, file => safe(file, true))) break;
+      if (command !== "uninstall") safe(parent, true);
     }
   }
   if (command === "install") {
@@ -75,11 +87,15 @@ try {
       fs.rmSync(stage, {recursive: true, force: true});
     }
   } else if (command === "uninstall") {
-    if (registration(manifest) !== registration(chromeManifest)) throw Error("Host registrations disagree.");
-    safe(executable);
-    fs.unlinkSync(chromeManifest);
-    fs.unlinkSync(manifest);
-    fs.unlinkSync(executable);
+    const origins = new Set();
+    const manifests = [chromeManifest, manifest].filter(file =>
+      existing(file, candidate => origins.add(registration(candidate))));
+    if (origins.size > 1) throw Error("Host registrations disagree.");
+    if (existing(executable, safe)) {
+      if (!manifests.length) throw Error("No matching host registration; inspect the helper manually.");
+      fs.unlinkSync(executable);
+    }
+    for (const file of manifests) fs.unlinkSync(file);
     console.log("Removed the native helper. Remove the extension separately in Brave.");
   } else if (command === "doctor") {
     const origin = registration(manifest);
